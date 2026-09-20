@@ -1,1 +1,4 @@
-"""Insight-to-action layer: Tasks, Emails, Workflows, Automations. Subscribes to Intelligence events and materializes Tasks, gating anything above a severity threshold behind human validation."""
+"""Insight-to-action layer: Tasks, Emails, Workflows, Automations. Currently
+implements Task creation from RiskCreated, gated behind pending_validation --
+no automatic execution, no external side effects. Knows nothing about
+Intelligence's internals, only the Risk record and the event it consumes."""
