@@ -18,3 +18,4 @@ class Product(Base, IdMixin, TimestampMixin):
 
     company: Mapped["Company"] = relationship(back_populates="products")
     supplier: Mapped["Supplier | None"] = relationship(back_populates="products")
+    transactions: Mapped[list["Transaction"]] = relationship(back_populates="product")

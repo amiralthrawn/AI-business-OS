@@ -77,8 +77,8 @@ def test_risk_created_creates_a_pending_validation_task(db_session, event_bus):
 
     assert task is not None
     assert task.status == TaskStatus.PENDING_VALIDATION
-    assert task.title == "Review supplier cost increase"
-    assert "20%" in task.description
+    assert task.title == f"Review: {risk.title}"
+    assert "20%" in task.title
 
 
 def test_task_is_traceable_to_risk_and_carries_the_same_related_entity(db_session, event_bus):

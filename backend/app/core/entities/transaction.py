@@ -39,7 +39,12 @@ class Transaction(Base, IdMixin, TimestampMixin):
     amount: Mapped[float] = mapped_column(Float, nullable=False)
     currency: Mapped[str] = mapped_column(String(3), nullable=False, default="EUR")
     occurred_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, index=True)
+    # Promised delivery date for a purchase_order, used to measure supplier
+    # delivery performance (delay = occurred_at - expected_at). Null for
+    # transaction types where "delivery" doesn't apply (sales_order, invoice)
+    # or where the promise date was never recorded.
+    expected_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     supplier: Mapped["Supplier | None"] = relationship(back_populates="transactions")
     customer: Mapped["Customer | None"] = relationship(back_populates="transactions")
-    product: Mapped["Product | None"] = relationship()
+    product: Mapped["Product | None"] = relationship(back_populates="transactions")

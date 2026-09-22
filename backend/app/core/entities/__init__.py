@@ -1,4 +1,5 @@
 from app.core.entities.base import Base, RelatedEntityType
+from app.core.entities.business_context import BusinessContext
 from app.core.entities.communication import Communication, CommunicationDirection
 from app.core.entities.company import Company
 from app.core.entities.contact import Contact
@@ -15,6 +16,7 @@ from app.core.entities.transaction import Transaction, TransactionStatus, Transa
 __all__ = [
     "Base",
     "RelatedEntityType",
+    "BusinessContext",
     "Company",
     "Contact",
     "Supplier",

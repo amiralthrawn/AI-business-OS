@@ -11,6 +11,7 @@ ENV_FILE = REPO_ROOT / ".env"
 class Settings(BaseSettings):
     database_url: str = "sqlite:///./data_core.db"
     openai_api_key: str | None = None
+    openai_model: str = "gpt-4o-mini"
 
     model_config = SettingsConfigDict(env_file=str(ENV_FILE), env_file_encoding="utf-8", extra="ignore")
 

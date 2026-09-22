@@ -2,11 +2,52 @@ import uuid
 
 from sqlalchemy.orm import Session
 
-from app.core.entities import Product
+from app.core.analytics import compute_company_financials, compute_monthly_series
+from app.core.entities import Product, TransactionType
 from app.core.events.business_event import BusinessEvent
 from app.core.events.bus import EventBus
+from app.data.service import list_suppliers, list_transactions
+from app.home.service import HomeService
 
 SUPPLIER_COST_INCREASED = "SupplierCostIncreased"
+
+_EMPTY_OVERVIEW: dict = {
+    "supplier_count": 0,
+    "total_spend": 0.0,
+    "suppliers": [],
+    "intelligence": [],
+    "recent_transactions": [],
+    "monthly_purchases": [],
+}
+
+
+def get_procurement_overview(session: Session, company_id: uuid.UUID | None) -> dict:
+    """Procurement domain overview (Step 23B): composed entirely from
+    `app.data.service.list_suppliers` (already used by the Suppliers data
+    page), `compute_company_financials` (its total_costs IS total spend),
+    and `HomeService.get_ai_priorities` filtered to the "procurement"
+    domain. No new source of truth."""
+
+    if company_id is None:
+        return dict(_EMPTY_OVERVIEW)
+
+    suppliers = list_suppliers(session, company_id)
+    financials = compute_company_financials(session, company_id)
+    intelligence = [
+        s for s in HomeService(session).get_ai_priorities(company_id, limit=1000) if s["domain"] == "procurement"
+    ]
+    recent_transactions = [t for t in list_transactions(session, company_id, limit=50) if t["supplier_id"] is not None][:10]
+    # Same cost basis as compute_company_financials.total_costs (Purchase Orders + Invoices).
+    monthly_purchases = compute_monthly_series(session, company_id, [TransactionType.PURCHASE_ORDER, TransactionType.INVOICE])
+
+    return {
+        "supplier_count": len(suppliers),
+        "total_spend": financials.total_costs,
+        "suppliers": suppliers,
+        "intelligence": intelligence,
+        "recent_transactions": recent_transactions,
+        "monthly_purchases": monthly_purchases,
+    }
 
 
 class ProcurementError(Exception):

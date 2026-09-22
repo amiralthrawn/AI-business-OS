@@ -1,13 +1,20 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from app.core.entities import Company
 from app.core.events.bus import EventBus
 from app.database import get_db
 from app.dependencies import get_event_bus
-from app.domains.procurement.schemas import SupplierCostChangeRequest, SupplierCostChangeResponse
-from app.domains.procurement.service import ProcurementError, ProcurementService
+from app.domains.procurement.schemas import ProcurementOverview, SupplierCostChangeRequest, SupplierCostChangeResponse
+from app.domains.procurement.service import ProcurementError, ProcurementService, get_procurement_overview
 
 router = APIRouter(prefix="/procurement", tags=["procurement"])
+
+
+@router.get("/overview", response_model=ProcurementOverview)
+def get_overview(db: Session = Depends(get_db)) -> dict:
+    company = db.query(Company).first()
+    return get_procurement_overview(db, company.id if company is not None else None)
 
 
 @router.post("/supplier-cost-changes", response_model=SupplierCostChangeResponse)
