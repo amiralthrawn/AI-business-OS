@@ -105,6 +105,8 @@ Next.js 16 (App Router) + TypeScript + Tailwind v4, single design system (Fraunc
 AI-business-OS/
 ├── README.md
 ├── .env.example
+├── start.bat                    # double-click launcher (Windows) -> start.ps1
+├── start.ps1                    # starts backend + frontend, each in its own window
 ├── docs/
 │   └── ARCHITECTURE.md          # detailed architecture reference, one section per layer/step
 ├── brain/                       # per-topic design notes + brain/decisions.md (the full decision log)
@@ -142,9 +144,32 @@ AI-business-OS/
 - **Backend**: Python, FastAPI, SQLAlchemy 2.x, Alembic, Pydantic v2, SQLite (dev), pytest, `openai` SDK (only used when `OPENAI_API_KEY` is set — see Limitations).
 - **Frontend**: Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4, ESLint 9. No external charting library — charts are hand-built SVG. No frontend test runner is configured yet (see Limitations).
 
+## Quick Start
+
+The fastest way to run both servers locally on Windows, once the one-time setup below has been done at least once:
+
+```text
+Double-click start.bat
+```
+
+The launcher (`start.bat` → `start.ps1`) starts backend and frontend **each in their own window**, so both stay running at the same time:
+
+- Backend → http://localhost:8000
+- Frontend → http://localhost:3000
+
+It opens your browser on `http://localhost:3000` automatically, but only once the frontend is actually responding — never on a fixed delay. If a port is already in use (e.g. another instance is already running), it skips starting a duplicate on that port and tells you so instead. If `backend\.venv` or `frontend\node_modules` don't exist yet, it says so and points at the manual setup below rather than guessing a setup command. It contains no API keys, tokens, or credentials — it only runs the same local commands documented below.
+
+Closing the launcher's own window does **not** stop the backend/frontend — each keeps running in its own window until you close that window (or Ctrl+C inside it).
+
+Prefer PowerShell directly? `start.bat` is just a double-clickable wrapper around:
+
+```powershell
+.\start.ps1
+```
+
 ## Getting Started
 
-Verified against the scripts and files actually present in this repository.
+The manual method — useful the first time (setup), or if you'd rather start backend and frontend yourself in two terminals. Verified against the scripts and files actually present in this repository.
 
 ### Prerequisites
 

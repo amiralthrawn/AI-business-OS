@@ -6,6 +6,7 @@ from app.actions.router import router as tasks_router
 from app.ai.ask_ai.router import router as ask_ai_router
 from app.business_context.router import router as business_context_router
 from app.company.router import router as company_router
+from app.config import get_settings
 from app.connectors.router import router as connectors_router
 from app.data.router import router as data_router
 from app.database import engine
@@ -23,16 +24,31 @@ from app.observation.router import router as observation_router
 app = FastAPI(title="AI Business OS", version="0.1.0")
 
 # The frontend's Server Components fetch server-to-server (no CORS involved),
-# but client components (Ask AI's form) call this API directly from the
-# browser, which is cross-origin as soon as ports differ. Dev-only: any
-# localhost/127.0.0.1 port, no credentials.
-app.add_middleware(
-    CORSMiddleware,
-    allow_origin_regex=r"http://(localhost|127\.0\.0\.1):\d+",
-    allow_credentials=False,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# but client components (Ask AI's form, Tasks board, ...) call this API
+# directly from the browser, which is cross-origin as soon as origins
+# differ. `ALLOWED_ORIGINS` unset (local dev) -> any localhost/127.0.0.1
+# port, matching the frontend dev server on whichever port it picked.
+# `ALLOWED_ORIGINS` set (deployment, e.g. Render) -> exactly the configured
+# origin(s) (e.g. the Vercel frontend URL) -- never both at once, so a
+# deployed backend never also trusts "http://localhost:*". No credentials
+# either way; no authentication is added by this.
+_allowed_origins = get_settings().cors_allowed_origins()
+if _allowed_origins is None:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origin_regex=r"http://(localhost|127\.0\.0\.1):\d+",
+        allow_credentials=False,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+else:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=_allowed_origins,
+        allow_credentials=False,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
 app.include_router(business_context_router)
 app.include_router(company_router)
